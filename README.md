@@ -1,1 +1,1 @@
-# Word-count-tool-
+# word-histogram-tool
