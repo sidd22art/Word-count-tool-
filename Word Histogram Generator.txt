@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- ================== SEO & META TAGS (Edit these for your blog) ================== -->
+    <title>Word Histogram Generator | Text Analysis & Frequency Visualizer</title>
+    <meta name="description" content="A powerful word frequency analyzer and histogram generator. Analyze text, create word clouds, and visualize word distributions with real-time statistics. Perfect for content analysis and text mining.">
+    <meta name="keywords" content="word histogram, text analysis, word frequency, word count, text visualizer, content analysis, word cloud, text mining, frequency distribution">
+    <meta name="author" content="TextAnalyzer Pro">
+    <link rel="canonical" href="https://your-domain.com/your-post-url" />
+
+    <!-- ================== OPTIMIZED FONTS & STYLES ================== -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+    
+    <style>
+        /* =========================================================================
+         * WORD HISTOGRAM GENERATOR STYLES
+         * Optimized for Blogger/Blogspot - Scoped to avoid template conflicts.
+         * ========================================================================= */
+
+        #word-histogram-app {
+            /* --- CUSTOMIZATION --- */
+            /* Edit these variables to easily change the tool's appearance */
+            --font-family: 'Poppins', sans-serif;
+            --primary-bg: #f0f2f5;
+            --container-bg: #ffffff;
+            --text-color: #1a202c;
+            --border-color: #000000;
+            --shadow-color: #000000;
+            --button-primary-bg: #000000;
+            --button-primary-text: #ffffff;
+            --button-secondary-bg: #6b7280;
+            --button-success-bg: #10b981;
+            --input-border-color: #d1d5db;
+            --input-focus-border: #000000;
+            --stat-card-bg: #f8fafc;
+            --stat-value-color: #1e293b;
+            --stat-label-color: #64748b;
+            --tooltip-bg: rgba(0,0,0,0.9);
+            --tooltip-text: #ffffff;
+            /* --- END CUSTOMIZATION --- */
+        }
+
+        #word-histogram-app *, #word-histogram-app *::before, #word-histogram-app *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        #word-histogram-app { font-family: var(--font-family); background-color: var(--primary-bg); color: var(--text-color); line-height: 1.6; padding: 1rem; }
+        
+        /* ================== LAYOUT & MAIN CONTAINER ================== */
+        #word-histogram-app .main-container { background-color: var(--container-bg); border: 2px solid var(--border-color); border-radius: 0.75rem; box-shadow: 8px 8px 0px var(--shadow-color); max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        
+        /* ================== BUTTONS ================== */
+        #word-histogram-app .btn { display: inline-flex; align-items: center; justify-content: center; background-color: var(--button-primary-bg); color: var(--button-primary-text); padding: 0.5rem 1rem; border: 2px solid var(--border-color); border-radius: 0.5rem; cursor: pointer; transition: all 0.2s ease; font-weight: 600; text-decoration: none; }
+        #word-histogram-app .btn:hover:not(:disabled) { background-color: #333; transform: translateY(-2px); color: var(--button-primary-text); }
+        #word-histogram-app .btn:disabled { cursor: not-allowed; opacity: 0.6; }
+        #word-histogram-app .btn-secondary { background-color: var(--button-secondary-bg); border-color: var(--button-secondary-bg); }
+        #word-histogram-app .btn-success { background-color: var(--button-success-bg); border-color: var(--button-success-bg); }
+        
+        /* ================== INPUTS & CONTROLS ================== */
+        #word-histogram-app .input-group { margin-bottom: 1.5rem; }
+        #word-histogram-app .label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: #374151; }
+        #word-histogram-app .textarea { width: 100%; padding: 0.75rem; border: 2px solid var(--input-border-color); border-radius: 0.5rem; font-family: inherit; font-size: 1rem; transition: border-color 0.2s; resize: vertical; min-height: 200px; }
+        #word-histogram-app .textarea:focus { outline: none; border-color: var(--input-focus-border); box-shadow: 0 0 0 3px rgba(0,0,0,0.1); }
+        #word-histogram-app .select, #word-histogram-app .input { width:100%; padding: 0.5rem; border: 2px solid var(--input-border-color); border-radius: 0.5rem; font-family: inherit; transition: border-color 0.2s; }
+        #word-histogram-app .select:focus, #word-histogram-app .input:focus { outline: none; border-color: var(--input-focus-border); }
+        
+        #word-histogram-app .controls-panel { background-color: var(--stat-card-bg); border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem; }
+        #word-histogram-app .controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; align-items: end; }
+        #word-histogram-app .control-item label { font-size: 0.875rem; font-weight: 500; display: block; margin-bottom: 0.25rem; }
+        
+        /* ================== CHART & VISUALIZATION ================== */
+        #word-histogram-app .chart-container { background-color: var(--container-bg); border: 2px solid var(--input-border-color); border-radius: 0.5rem; padding: 1rem; min-height: 420px; position: relative; display: flex; align-items: center; justify-content: center; }
+        #word-histogram-app .chart-placeholder { text-align: center; color: #9ca3af; }
+        #word-histogram-app .chart-placeholder i { font-size: 3rem; margin-bottom: 1rem; }
+        #word-histogram-app .chart-svg { width: 100%; height: 100%; border-radius: 0.5rem; }
+        #word-histogram-app .word-bar { cursor: pointer; transition: opacity 0.2s; }
+        #word-histogram-app .word-bar:hover { opacity: 0.8; }
+        
+        #word-histogram-app .word-cloud { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.5rem; padding: 1rem; width: 100%; height: 100%; position: relative; overflow: hidden; }
+        #word-histogram-app .word-item { position: absolute; font-weight: bold; cursor: pointer; transition: all 0.3s ease; user-select: none; }
+        #word-histogram-app .word-item:hover { transform: scale(1.1); filter: brightness(1.2); }
+        
+        /* ================== STATISTICS ================== */
+        #word-histogram-app .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+        #word-histogram-app .stat-card { background-color: var(--stat-card-bg); border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; text-align: center; }
+        #word-histogram-app .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--stat-value-color); }
+        #word-histogram-app .stat-label { font-size: 0.875rem; color: var(--stat-label-color); margin-top: 0.25rem; }
+        
+        /* ================== LAYOUT & HELPERS ================== */
+        .hidden { display: none !important; }
+        #word-histogram-app .flex { display: flex; }
+        #word-histogram-app .items-center { align-items: center; }
+        #word-histogram-app .justify-between { justify-content: space-between; }
+        #word-histogram-app .gap-4 { gap: 1rem; }
+        #word-histogram-app .mb-6 { margin-bottom: 1.5rem; }
+        #word-histogram-app .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        
+        /* ================== TOOLTIP (should be outside the app container in HTML for positioning) ================== */
+        .word-histogram-tooltip { position: absolute; background: var(--tooltip-bg); color: var(--tooltip-text); padding: 0.5rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; pointer-events: none; z-index: 1000; opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+        .word-histogram-tooltip.show { opacity: 1; }
+        
+        /* ================== RESPONSIVE DESIGN ================== */
+        @media (max-width: 992px) {
+            #word-histogram-app .main-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            #word-histogram-app .controls-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+            #word-histogram-app .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            #word-histogram-app .main-container { padding: 1rem; }
+            #word-histogram-app .flex.justify-between { flex-direction: column; align-items: flex-start; gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- This is the main container for the app. All CSS and JS are scoped to this ID. -->
+    <div id="word-histogram-app">
+        <div class="main-container">
+            <!-- ================== HEADER ================== -->
+            <header class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 style="font-size: 1.875rem; font-weight: 700;"><i class="fas fa-chart-bar" style="margin-right: 0.5rem;"></i>Word Histogram Generator</h1>
+                    <p style="color: #4a5568;">Analyze text frequency and create beautiful word visualizations</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button id="sample-btn" class="btn btn-secondary" style="font-size: 0.875rem;" aria-label="Load sample text"><i class="fas fa-file-alt" style="margin-right: 0.5rem;"></i>Load Sample</button>
+                    <button id="export-btn" class="btn btn-success" style="font-size: 0.875rem;" aria-label="Export data"><i class="fas fa-download" style="margin-right: 0.5rem;"></i>Export</button>
+                </div>
+            </header>
+
+            <!-- ================== MAIN CONTENT GRID ================== -->
+            <main class="main-grid">
+                <!-- Left Panel: Input & Controls -->
+                <section>
+                    <div class="input-group">
+                        <label for="text-input" class="label"><i class="fas fa-edit" style="margin-right: 0.5rem;"></i>Enter Text to Analyze</label>
+                        <textarea id="text-input" class="textarea" placeholder="Enter your text here...
+
+Or click 'Load Sample' to see an example."></textarea>
+                    </div>
+                    
+                    <div class="controls-panel">
+                        <div class="controls-grid">
+                            <div class="control-item">
+                                <label for="min-length">Min Word Length</label>
+                                <input type="number" id="min-length" class="input" value="3" min="1" max="15" aria-label="Minimum word length">
+                            </div>
+                            <div class="control-item">
+                                <label for="max-words">Words to Show</label>
+                                <input type="number" id="max-words" class="input" value="20" min="5" max="100" aria-label="Maximum words to show">
+                            </div>
+                            <div class="control-item">
+                                <label for="chart-type">Chart Type</label>
+                                <select id="chart-type" class="select" aria-label="Select chart type">
+                                    <option value="histogram">Histogram</option>
+                                    <option value="wordcloud">Word Cloud</option>
+                                </select>
+                            </div>
+                            <div class="control-item">
+                                <label for="sort-by">Sort By</label>
+                                <select id="sort-by" class="select" aria-label="Select sort order">
+                                    <option value="frequency">Frequency</option>
+                                    <option value="alphabetical">Alphabetical</option>
+                                    <option value="length">Word Length</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <button id="analyze-btn" class="btn"><i class="fas fa-chart-line" style="margin-right: 0.5rem;"></i>Analyze Text</button>
+                            <button id="clear-btn" class="btn btn-secondary"><i class="fas fa-trash" style="margin-right: 0.5rem;"></i>Clear</button>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Right Panel: Visualization -->
+                <section>
+                    <div id="chart-container" class="chart-container">
+                        <div id="chart-placeholder" class="chart-placeholder">
+                            <i class="fas fa-eye-slash"></i>
+                            <p>Your analysis will appear here.</p>
+                        </div>
+                        <div id="histogram-view" class="hidden" style="width:100%; height:100%;">
+                            <svg id="histogram-svg" class="chart-svg" viewBox="0 0 800 420"></svg>
+                        </div>
+                        <div id="wordcloud-view" class="word-cloud hidden"></div>
+                    </div>
+                    
+                    <!-- Statistics Panel -->
+                    <div class="stats-grid" id="stats-panel">
+                        <div class="stat-card">
+                            <div id="total-words" class="stat-value">0</div>
+                            <div class="stat-label">Total Words</div>
+                        </div>
+                        <div class="stat-card">
+                            <div id="unique-words" class="stat-value">0</div>
+                            <div class="stat-label">Unique Words</div>
+                        </div>
+                        <div class="stat-card">
+                            <div id="avg-length" class="stat-value">0.0</div>
+                            <div class="stat-label">Avg Length</div>
+                        </div>
+                        <div class="stat-card">
+                            <div id="most-common" class="stat-value">-</div>
+                            <div class="stat-label">Most Common</div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Tooltip element. Placed outside the main app div for better positioning behavior. -->
+    <div id="word-histogram-tooltip" class="word-histogram-tooltip"></div>
+
+    <script>
+    // =========================================================================
+    // WORD HISTOGRAM GENERATOR SCRIPT
+    // Optimized for performance and scoped for safe embedding.
+    // =========================================================================
+    (function() {
+        'use strict';
+        
+        const app = document.getElementById('word-histogram-app');
+        if (!app) {
+            console.error('Word Histogram App container not found!');
+            return;
+        }
+
+        // ================== ELEMENT SELECTORS (Scoped to the app) ==================
+        const textInput = app.querySelector('#text-input');
+        const analyzeBtn = app.querySelector('#analyze-btn');
+        const clearBtn = app.querySelector('#clear-btn');
+        const sampleBtn = app.querySelector('#sample-btn');
+        const exportBtn = app.querySelector('#export-btn');
+        const minLengthInput = app.querySelector('#min-length');
+        const maxWordsInput = app.querySelector('#max-words');
+        const chartTypeSelect = app.querySelector('#chart-type');
+        const sortBySelect = app.querySelector('#sort-by');
+        const svg = app.querySelector('#histogram-svg');
+        const histogramView = app.querySelector('#histogram-view');
+        const wordcloudView = app.querySelector('#wordcloud-view');
+        const chartPlaceholder = app.querySelector('#chart-placeholder');
+        
+        const tooltip = document.getElementById('word-histogram-tooltip');
+        
+        let wordData = [];
+
+        const sampleTexts = [
+            "The quick brown fox jumps over the lazy dog. The fox is quick and the dog is lazy. Quick brown foxes are amazing animals that demonstrate agility and intelligence in the wild.",
+            "Data science is an interdisciplinary field that uses scientific methods, processes, algorithms and systems to extract knowledge and insights from noisy, structured and unstructured data, and apply knowledge and actionable insights from data across a broad range of application domains.",
+            "To be, or not to be, that is the question: Whether 'tis nobler in the mind to suffer The slings and arrows of outrageous fortune, Or to take arms against a sea of troubles And by opposing end them."
+        ];
+
+        // ================== EVENT LISTENERS ==================
+        analyzeBtn.addEventListener('click', handleAnalysis);
+        clearBtn.addEventListener('click', clearAll);
+        sampleBtn.addEventListener('click', loadSampleText);
+        exportBtn.addEventListener('click', exportData);
+        [minLengthInput, maxWordsInput, sortBySelect, chartTypeSelect].forEach(el => {
+            el.addEventListener('change', () => {
+                if (textInput.value.trim()) handleAnalysis();
+            });
+        });
+
+        // ================== CORE LOGIC ==================
+        function handleAnalysis() {
+            const text = textInput.value.trim();
+            if (!text) {
+                alert('Please enter some text to analyze!');
+                return;
+            }
+
+            setLoading(true);
+            
+            // Use setTimeout to allow the UI to update (show loading state) before heavy computation
+            setTimeout(() => {
+                analyzeText(text);
+                setLoading(false);
+            }, 50);
+        }
+
+        /**
+         * Analyzes the text and updates the UI.
+         * Time Complexity: O(N + M log M) where N is text length and M is unique words.
+         * This is dominated by the sorting step, which is optimal.
+         */
+        function analyzeText(text) {
+            const minLength = parseInt(minLengthInput.value) || 3;
+            const maxWords = parseInt(maxWordsInput.value) || 20;
+            const sortBy = sortBySelect.value;
+            
+            // O(N) pass: Tokenize, clean, and filter words
+            const words = text.toLowerCase().match(/\b[\w']+\b/g) || [];
+            const filteredWords = words.filter(word => word.length >= minLength);
+            
+            // O(M) pass: Count word frequencies using a Map for efficiency
+            const freqMap = new Map();
+            filteredWords.forEach(word => {
+                freqMap.set(word, (freqMap.get(word) || 0) + 1);
+            });
+            
+            // Convert map to array for sorting
+            const unsortedData = Array.from(freqMap.entries(), ([word, count]) => ({ word, count }));
+
+            // O(M log M) pass: Sort the data based on user selection
+            wordData = unsortedData.sort((a, b) => {
+                switch(sortBy) {
+                    case 'alphabetical': return a.word.localeCompare(b.word);
+                    case 'length': return b.word.length - a.word.length || b.count - a.count;
+                    case 'frequency':
+                    default: return b.count - a.count;
+                }
+            }).slice(0, maxWords);
+            
+            updateStats(words, freqMap);
+            renderVisualization();
+        }
+
+        function renderVisualization() {
+            const chartType = chartTypeSelect.value;
+            showView(chartType);
+            if (chartType === 'histogram') {
+                renderHistogram();
+            } else {
+                renderWordCloud();
+            }
+        }
+
+        // ================== UI & RENDERING FUNCTIONS ==================
+        function renderHistogram() {
+            svg.innerHTML = ''; // Clear previous SVG content
+            if (!wordData.length) return;
+            
+            svg.setAttribute('aria-label', `Bar chart showing frequency of the top ${wordData.length} words.`);
+            const desc = document.createElementNS('http://www.w3.org/2000/svg', 'desc');
+            desc.textContent = `Words displayed are: ${wordData.map(d => d.word).join(', ')}.`;
+            svg.appendChild(desc);
+
+            const margin = { top: 30, right: 20, bottom: 80, left: 50 };
+            const width = 800 - margin.left - margin.right;
+            const height = 420 - margin.top - margin.bottom;
+            
+            const maxCount = Math.max(1, ...wordData.map(d => d.count));
+            const barWidth = width / wordData.length;
+            
+            const g = createSVGElement('g', { transform: `translate(${margin.left},${margin.top})` });
+            svg.appendChild(g);
+            
+            const colors = generateColors(wordData.length);
+            
+            wordData.forEach((item, i) => {
+                const barHeight = (item.count / maxCount) * height;
+                const x = i * barWidth;
+                const y = height - barHeight;
+                
+                const rect = createSVGElement('rect', {
+                    'class': 'word-bar', 'x': x + 2, 'y': y,
+                    'width': barWidth - 4, 'height': barHeight,
+                    'fill': colors[i], 'rx': 2, 'ry': 2
+                });
+                
+                rect.addEventListener('mousemove', e => showTooltip(e, item));
+                rect.addEventListener('mouseleave', hideTooltip);
+                g.appendChild(rect);
+                
+                if (barHeight > 20) {
+                    const countLabel = createSVGElement('text', {
+                        'x': x + barWidth / 2, 'y': y + 15, 'text-anchor': 'middle',
+                        'font-size': '12', 'font-weight': 'bold', 'fill': '#fff', 'pointer-events':'none'
+                    });
+                    countLabel.textContent = item.count;
+                    g.appendChild(countLabel);
+                }
+                
+                const wordLabel = createSVGElement('text', {
+                    'x': 0, 'y': 0, 'text-anchor': 'end', 'font-size': '12', 'fill': '#333',
+                    'transform': `translate(${x + barWidth/2}, ${height + 10}) rotate(-45)`
+                });
+                wordLabel.textContent = item.word.length > 10 ? item.word.substr(0, 9) + '…' : item.word;
+                g.appendChild(wordLabel);
+            });
+            
+            addAxes(g, width, height, maxCount);
+        }
+
+        function renderWordCloud() {
+            wordcloudView.innerHTML = '';
+            if (!wordData.length) return;
+
+            const maxCount = Math.max(...wordData.map(d => d.count)) || 1;
+            const minSize = 16, maxSize = 60;
+            const colors = generateColors(wordData.length);
+            const fragment = document.createDocumentFragment();
+
+            wordData.forEach((item, i) => {
+                const fontSize = minSize + (item.count / maxCount) * (maxSize - minSize);
+                const span = document.createElement('span');
+                span.className = 'word-item';
+                span.textContent = item.word;
+                span.style.fontSize = fontSize + 'px';
+                span.style.color = colors[i];
+                
+                // Simple spiral positioning algorithm for speed
+                const angle = i * 137.5; // Golden angle for phyllotaxis
+                const radius = Math.sqrt(i + 1) * (maxSize / 4);
+                span.style.top = `calc(50% + ${Math.sin(angle * Math.PI / 180) * radius}px)`;
+                span.style.left = `calc(50% + ${Math.cos(angle * Math.PI / 180) * radius}px)`;
+                span.style.transform = 'translate(-50%, -50%)';
+
+                span.addEventListener('mousemove', e => showTooltip(e, item));
+                span.addEventListener('mouseleave', hideTooltip);
+                fragment.appendChild(span);
+            });
+            wordcloudView.appendChild(fragment);
+        }
+
+        function updateStats(allWords, freqMap) {
+            const totalWords = allWords.length;
+            const uniqueWords = freqMap.size;
+            const avgLength = totalWords > 0 ? (allWords.reduce((sum, word) => sum + word.length, 0) / totalWords).toFixed(1) : 0;
+            const mostCommon = wordData.length > 0 ? wordData[0].word : '-';
+            
+            app.querySelector('#total-words').textContent = totalWords;
+            app.querySelector('#unique-words').textContent = uniqueWords;
+            app.querySelector('#avg-length').textContent = avgLength;
+            app.querySelector('#most-common').textContent = mostCommon;
+        }
+
+        // ================== HELPER FUNCTIONS ==================
+        function createSVGElement(tag, attributes) {
+            const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+            for (const key in attributes) {
+                el.setAttribute(key, attributes[key]);
+            }
+            return el;
+        }
+
+        function addAxes(g, width, height, maxCount) {
+            // Y-axis
+            const yAxis = createSVGElement('line', { x1: 0, y1: 0, x2: 0, y2: height, stroke: '#ccc' });
+            g.appendChild(yAxis);
+            for (let i = 0; i <= 5; i++) {
+                const y = height - (i / 5 * height);
+                const val = Math.ceil(i / 5 * maxCount);
+                const line = createSVGElement('line', { x1: -5, y1: y, x2: 0, y2: y, stroke: '#ccc' });
+                const label = createSVGElement('text', { x: -10, y: y + 4, 'text-anchor': 'end', 'font-size': '12', fill: '#666' });
+                label.textContent = val;
+                g.appendChild(line);
+                g.appendChild(label);
+            }
+        }
+
+        function generateColors(count) {
+            const colors = [];
+            const hueStart = 200; // Start with a nice blue
+            for (let i = 0; i < count; i++) {
+                const hue = (hueStart + (i * 45)) % 360;
+                colors.push(`hsl(${hue}, 85%, 55%)`);
+            }
+            return colors;
+        }
+        
+        function showView(view) {
+            chartPlaceholder.classList.add('hidden');
+            histogramView.classList.toggle('hidden', view !== 'histogram');
+            wordcloudView.classList.toggle('hidden', view !== 'wordcloud');
+        }
+
+        function setLoading(isLoading) {
+            analyzeBtn.disabled = isLoading;
+            analyzeBtn.innerHTML = isLoading 
+                ? `<i class="fas fa-spinner fa-spin" style="margin-right: 0.5rem;"></i>Analyzing...`
+                : `<i class="fas fa-chart-line" style="margin-right: 0.5rem;"></i>Analyze Text`;
+        }
+        
+        function clearAll() {
+            textInput.value = '';
+            wordData = [];
+            chartPlaceholder.classList.remove('hidden');
+            histogramView.classList.add('hidden');
+            wordcloudView.classList.add('hidden');
+            updateStats([], new Map());
+        }
+        
+        function loadSampleText() {
+            textInput.value = sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
+            handleAnalysis();
+        }
+        
+        function exportData() {
+            if (wordData.length === 0) {
+                alert('No data to export. Please analyze some text first.');
+                return;
+            }
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + "Word,Count\n" 
+                + wordData.map(e => `"${e.word}",${e.count}`).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "word_frequency_data.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function showTooltip(event, data) {
+            const percentage = (data.count / (parseInt(app.querySelector('#total-words').textContent) || 1) * 100).toFixed(2);
+            tooltip.innerHTML = `<strong>${data.word}</strong><br>Count: ${data.count}<br>Frequency: ${percentage}%`;
+            tooltip.classList.add('show');
+            
+            // Smart positioning to prevent overflow
+            const tooltipRect = tooltip.getBoundingClientRect();
+            let x = event.pageX + 15;
+            let y = event.pageY + 15;
+
+            if (x + tooltipRect.width > window.innerWidth) {
+                x = event.pageX - tooltipRect.width - 15;
+            }
+            if (y + tooltipRect.height > window.innerHeight) {
+                y = event.pageY - tooltipRect.height - 15;
+            }
+            
+            tooltip.style.left = `${x}px`;
+            tooltip.style.top = `${y}px`;
+        }
+
+        function hideTooltip() {
+            tooltip.classList.remove('show');
+        }
+
+    })();
+    </script>
+</body>
+</html>
